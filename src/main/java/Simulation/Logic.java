@@ -57,7 +57,7 @@ public class Logic {
     }
 
     public int setColour(Pair coords){
-        int toRet = cellList.get(calc.indexFromCoord(coords)).getID();
+        int toRet = cellList.get(calc.indexFromCoord(coords)).getId();
         return toRet;
     }
 }

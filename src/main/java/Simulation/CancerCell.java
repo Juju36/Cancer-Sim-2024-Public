@@ -14,6 +14,77 @@ package Simulation;
  * Growing means turning a dead cell into a CancerCell.
  */
 
+import Util.Pair;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 public class CancerCell extends Cell{
 
+    public CancerCell(Pair coords){
+        super(1,coords.getX(), coords.getY(),3);
+    }
+
+    @Override
+    public void interactNeighbors(ArrayList<Cell> neighbors) {
+        Random random = new Random();
+
+        // Keep track of nearby dead, immune, or tissue cells
+        ArrayList<Cell> deadCells = new ArrayList<>();
+        ArrayList<Cell> immuneCells = new ArrayList<>();
+        ArrayList<Cell> tissueCells = new ArrayList<>();
+
+        for (Cell cell : neighbors) {
+            // Check if a cell is adjacent and either a dead cell (id 0), immune cell (id 4), or tissue cell (id 1)
+            if(checkAdjacent(cell) && cell.getId() == 0) {
+                deadCells.add(cell); // Add this adjacent cell to the list of nearby dead cells
+            }
+            if (checkAdjacent(cell) && cell.getId() == 4) {
+                immuneCells.add(cell); // Add this adjacent cell to the list of nearby immune cells
+            }
+            if (checkAdjacent(cell) && cell.getId() == 1) {
+                tissueCells.add(cell); // Add this adjacent cell to the list of nearby tissue cells
+            }
+        }
+
+        if (!deadCells.isEmpty()){
+            Cell target = deadCells.get(random.nextInt(deadCells.size()));
+
+            // Replace the dead cell with a cancer cell
+            Pair cancerCellCoords = new Pair(target.getX(), target.getY());
+            neighbors.remove(target);
+            neighbors.add(new CancerCell(cancerCellCoords));
+        }
+
+        else if (!tissueCells.isEmpty() && tissueCells.size() > immuneCells.size()){
+            Cell target = tissueCells.get(random.nextInt(tissueCells.size()));
+
+            // Replace the tissue cell with a cancer cell
+            Pair cancerCellCoords = new Pair(target.getX(), target.getY());
+            neighbors.remove(target);
+            neighbors.add(new CancerCell(cancerCellCoords));
+        }
+
+        else if (!immuneCells.isEmpty()){
+            Cell target = immuneCells.get(random.nextInt(immuneCells.size()));
+
+            // Lower immune cell's current strength by 1
+            int currentStrength = target.getStrength();
+            target.setStrength(currentStrength - 1);
+
+            // If the immune cell's strength is 0, replace it with a dead cell
+            if (target.getStrength() == 0){
+                Pair deadCellCoords = new Pair(target.getX(), target.getY());
+                neighbors.remove(target);
+                neighbors.add(new DeadCell(deadCellCoords));
+            }
+        }
+    }
+
+    private boolean checkAdjacent(Cell cell) {
+        int dx = Math.abs(this.getX() - cell.getX());
+        int dy = Math.abs(this.getY() - cell.getY());
+        //Check if the cell is adjacent and not at position of the immune cell
+        return (dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0));
+    }
 }
