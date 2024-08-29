@@ -20,9 +20,17 @@ public class TissueCell extends Cell{
     @Override
     public void interactNeighbors(ArrayList<Cell> neighbors) {
         Random random = new Random();
+
+        // Create copies of the neighbors list for safe iteration
+        ArrayList<Cell> neighborsCopy = new ArrayList<>(neighbors);
+
         ArrayList<Cell> deadCells = new ArrayList<>(); // Keep track of nearby dead cells
 
-        for (Cell cell : neighbors) {
+        // Temporary lists to avoid ConcurrentModificationException
+        ArrayList<Cell> cellsToRemove = new ArrayList<>();
+        ArrayList<Cell> cellsToAdd = new ArrayList<>();
+
+        for (Cell cell : neighborsCopy) {
             // Check if a cell is adjacent and a dead cell (which has id 0)
             if(checkAdjacent(cell) && cell.getId() == 0) {
                 deadCells.add(cell); // Add this adjacent cell to the list of nearby dead cells
@@ -34,9 +42,13 @@ public class TissueCell extends Cell{
 
             // Replace the dead cell with a tissue cell
             Pair tissueCellCoords = new Pair(target.getX(), target.getY());
-            neighbors.remove(target);
-            neighbors.add(new TissueCell(tissueCellCoords));
+            cellsToRemove.add(target);
+            cellsToAdd.add(new TissueCell(tissueCellCoords));
         }
+
+        // Apply all changes to the neighbors list after iteration
+        neighbors.removeAll(cellsToRemove);
+        neighbors.addAll(cellsToAdd);
     }
 
     private boolean checkAdjacent(Cell cell) {

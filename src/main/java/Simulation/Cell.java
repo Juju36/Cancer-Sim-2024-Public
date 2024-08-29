@@ -87,7 +87,7 @@ public class Cell{
     }
 
     public void interactNeighbors(ArrayList<Cell> neighbors){
-        // leave blank for now
+        // leave blank
     }
 
     // Private method to check adjacent cells and determine behavior

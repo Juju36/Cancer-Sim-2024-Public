@@ -19,9 +19,17 @@ public class ImmuneCell extends Cell{
     public void interactNeighbors(ArrayList<Cell> neighbors){
 
         Random random = new Random();
+
+        // Create copies of the neighbors list for safe iteration
+        ArrayList<Cell> neighborsCopy = new ArrayList<>(neighbors);
+
         ArrayList<Cell> cancerCells = new ArrayList<>(); // List to keep track of nearby cancer cells
 
-        for (Cell cell : neighbors){
+        // Temporary lists to avoid the ConcurrentModificationException issue
+        ArrayList<Cell> cellsToRemove = new ArrayList<>();
+        ArrayList<Cell> cellsToAdd = new ArrayList<>();
+
+        for (Cell cell : neighborsCopy){
             // Check if the cell is adjacent and is a cancer cell (which has id 2)
             if (checkAdjacent(cell) && cell.getId() == 2) {
                 cancerCells.add(cell); // Add this adjacent cancer cell to the list of nearby cancer cells
@@ -35,14 +43,18 @@ public class ImmuneCell extends Cell{
 
             // Replace the cancer cell with a new dead cell
             Pair deadCellCoords = new Pair(target.getX(), target.getY());
-            neighbors.remove(target);
-            neighbors.add(new DeadCell(deadCellCoords));
+            cellsToRemove.add(target);
+            cellsToAdd.add(new DeadCell(deadCellCoords));
 
             // Optional - 50% chance to continue attacking cancer cells
             if(random.nextDouble() > 0.5) {
                 break;
             }
         }
+
+        // Apply all the changes
+        neighbors.removeAll(cellsToRemove);
+        neighbors.addAll(cellsToAdd);
     }
 
     private boolean checkAdjacent(Cell cell) {

@@ -1,6 +1,7 @@
 package Simulation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import Util.Calculator;
 import Util.Pair;
@@ -51,7 +52,15 @@ public class Logic {
      * Calls the interaction method on each cell in the list.
      */
     public void timeStep(){
-        for(Cell c : cellList){
+
+        // Shuffle the copy to randomize the order of cell processing
+        Collections.shuffle(cellList);
+
+        // Create a copy of the cellList to iterate over
+        ArrayList<Cell> cellListCopy = new ArrayList<>(cellList);
+
+        for (Cell c : cellListCopy) {
+            // Each cell interacts with its neighbors
             c.interactNeighbors(cellList);
         }
     }
